@@ -25,7 +25,7 @@ import 'package:rest_api_client/options/logging_options.dart';
 import 'package:rest_api_client/options/rest_api_client_options.dart';
 
 class RestApiClientImpl implements RestApiClient {
-  late Dio _dio;
+  late Dio dio;
 
   late RestApiClientOptions _options;
   late ExceptionOptions _exceptionOptions;
@@ -56,14 +56,14 @@ class RestApiClientImpl implements RestApiClient {
     _authOptions = authOptions ?? AuthOptions();
     _cacheOptions = cacheOptions ?? CacheOptions();
 
-    _dio = Dio(BaseOptions(baseUrl: _options.baseUrl));
+    dio = Dio(BaseOptions(baseUrl: _options.baseUrl));
 
-    _dio.httpClientAdapter = getAdapter();
+    dio.httpClientAdapter = getAdapter();
 
     exceptionHandler = ExceptionHandler(exceptionOptions: _exceptionOptions);
 
     authHandler = AuthHandler(
-        dio: _dio,
+        dio: dio,
         options: options,
         exceptionOptions: _exceptionOptions,
         authOptions: _authOptions,
@@ -94,7 +94,7 @@ class RestApiClientImpl implements RestApiClient {
     RestApiClientRequestOptions? options,
   }) async {
     try {
-      final response = await _dio.get(
+      final response = await dio.get(
         path,
         queryParameters: queryParameters,
         options: options?.toOptions(),
@@ -130,7 +130,7 @@ class RestApiClientImpl implements RestApiClient {
     final requestOptions = RequestOptions(
       path: path,
       queryParameters: queryParameters,
-      headers: _dio.options.headers,
+      headers: dio.options.headers,
     );
 
     return CacheResult(
@@ -178,7 +178,7 @@ class RestApiClientImpl implements RestApiClient {
     bool cacheEnabled = false,
   }) async {
     try {
-      final response = await _dio.post(
+      final response = await dio.post(
         path,
         data: data,
         queryParameters: queryParameters,
@@ -217,7 +217,7 @@ class RestApiClientImpl implements RestApiClient {
       path: path,
       queryParameters: queryParameters,
       data: data,
-      headers: _dio.options.headers,
+      headers: dio.options.headers,
     );
 
     return CacheResult(
@@ -267,7 +267,7 @@ class RestApiClientImpl implements RestApiClient {
     RestApiClientRequestOptions? options,
   }) async {
     try {
-      final response = await _dio.put(
+      final response = await dio.put(
         path,
         queryParameters: queryParameters,
         data: data,
@@ -300,7 +300,7 @@ class RestApiClientImpl implements RestApiClient {
     RestApiClientRequestOptions? options,
   }) async {
     try {
-      final response = await _dio.head(
+      final response = await dio.head(
         path,
         queryParameters: queryParameters,
         data: data,
@@ -333,7 +333,7 @@ class RestApiClientImpl implements RestApiClient {
     RestApiClientRequestOptions? options,
   }) async {
     try {
-      final response = await _dio.delete(
+      final response = await dio.delete(
         path,
         queryParameters: queryParameters,
         data: data,
@@ -366,7 +366,7 @@ class RestApiClientImpl implements RestApiClient {
     RestApiClientRequestOptions? options,
   }) async {
     try {
-      final response = await _dio.patch(
+      final response = await dio.patch(
         path,
         queryParameters: queryParameters,
         data: data,
@@ -404,7 +404,7 @@ class RestApiClientImpl implements RestApiClient {
     FutureOr<T> Function(dynamic data)? parser,
   }) async {
     try {
-      final response = await _dio.download(
+      final response = await dio.download(
         urlPath,
         savePath,
         queryParameters: queryParameters,
@@ -434,7 +434,7 @@ class RestApiClientImpl implements RestApiClient {
   }
 
   void setContentType(String contentType) =>
-      _dio.options.contentType = contentType;
+      dio.options.contentType = contentType;
 
   @override
   Future clearStorage() async {
@@ -446,7 +446,7 @@ class RestApiClientImpl implements RestApiClient {
 
   void _configureLogging() {
     if (_loggingOptions.logNetworkTraffic) {
-      _dio.interceptors.add(
+      dio.interceptors.add(
         PrettyDioLogger(
           responseBody: _loggingOptions.responseBody,
           requestBody: _loggingOptions.requestBody,
@@ -461,9 +461,9 @@ class RestApiClientImpl implements RestApiClient {
   }
 
   void _addInterceptors(List<Interceptor> interceptors) {
-    _dio.interceptors.addAll(interceptors);
+    dio.interceptors.addAll(interceptors);
 
-    _dio.interceptors.add(RefreshTokenInterceptor(
+    dio.interceptors.add(RefreshTokenInterceptor(
       authHandler: authHandler,
       exceptionHandler: exceptionHandler,
       exceptionOptions: _exceptionOptions,
@@ -472,7 +472,7 @@ class RestApiClientImpl implements RestApiClient {
 
   void _configureCertificateOverride() {
     if (_options.overrideBadCertificate && !kIsWeb) {
-      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+      (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
         final client = HttpClient();
 
         client.badCertificateCallback =
@@ -500,9 +500,9 @@ class RestApiClientImpl implements RestApiClient {
   }
 
   void addOrUpdateHeader({required String key, required String value}) =>
-      _dio.options.headers.containsKey(key)
-          ? _dio.options.headers.update(key, (v) => value)
-          : _dio.options.headers.addAll({key: value});
+      dio.options.headers.containsKey(key)
+          ? dio.options.headers.update(key, (v) => value)
+          : dio.options.headers.addAll({key: value});
 
   FutureOr<T?> _resolveResult<T>(dynamic data,
       [FutureOr<T> Function(dynamic data)? parser]) async {
