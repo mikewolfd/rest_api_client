@@ -6,7 +6,7 @@ abstract class RestApiClient {
   late AuthHandler authHandler;
   late ExceptionHandler exceptionHandler;
   late CacheHandler cacheHandler;
-
+  late Dio dio;
   Future<RestApiClient> init();
 
   Future<Result<T>> get<T>(
