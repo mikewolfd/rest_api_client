@@ -8,6 +8,7 @@ abstract class RestApiClient {
   late CacheHandler cacheHandler;
   Map<String, String> get headers;
 
+  late Dio dio;
   Future<RestApiClient> init();
 
   Future<Result<T>> get<T>(
