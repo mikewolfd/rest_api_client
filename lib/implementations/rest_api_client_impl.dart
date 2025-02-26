@@ -52,6 +52,7 @@ class RestApiClientImpl implements RestApiClient {
     LoggingOptions? loggingOptions,
     AuthOptions? authOptions,
     CacheOptions? cacheOptions,
+    ExceptionHandler? exceptionHandler,
     List<Interceptor> interceptors = const [],
   }) {
     _options = options;
@@ -64,7 +65,8 @@ class RestApiClientImpl implements RestApiClient {
 
     dio.httpClientAdapter = getAdapter();
 
-    exceptionHandler = ExceptionHandler(exceptionOptions: _exceptionOptions);
+    exceptionHandler = exceptionHandler ??
+        ExceptionHandler(exceptionOptions: _exceptionOptions);
 
     authHandler = AuthHandler(
       dio: dio,
