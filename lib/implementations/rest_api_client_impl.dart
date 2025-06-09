@@ -26,7 +26,7 @@ import 'package:rest_api_client/options/rest_api_client_options.dart';
 
 class RestApiClientImpl implements RestApiClient {
   /// Dio instance for making API requests
-  late Dio _dio;
+  late Dio dio;
 
   /// Options for the REST API client
   late RestApiClientOptions _options;
@@ -61,7 +61,7 @@ class RestApiClientImpl implements RestApiClient {
   /// Returns the headers from the Dio instance, converting values to strings.
   @override
   Map<String, String> get headers =>
-      _dio.options.headers.map((key, value) => MapEntry(key, value.toString()));
+      dio.options.headers.map((key, value) => MapEntry(key, value.toString()));
 
   /// Constructor for initializing the RestApiClientImpl with required options and interceptors.
   RestApiClientImpl({
@@ -80,15 +80,15 @@ class RestApiClientImpl implements RestApiClient {
     _cacheOptions = cacheOptions ?? CacheOptions(); // Set cache options
 
     /// Initialize Dio with base URL
-    _dio = Dio(BaseOptions(baseUrl: _options.baseUrl));
+    dio = Dio(BaseOptions(baseUrl: _options.baseUrl));
 
     /// Set the appropriate HTTP client adapter depending on the platform
-    _dio.httpClientAdapter = getAdapter();
+    dio.httpClientAdapter = getAdapter();
 
     // Initialize various handlers
     exceptionHandler = ExceptionHandler(exceptionOptions: _exceptionOptions);
     authHandler = AuthHandler(
-      dio: _dio,
+      dio: dio,
       options: options,
       exceptionOptions: _exceptionOptions,
       authOptions: _authOptions,
@@ -129,7 +129,7 @@ class RestApiClientImpl implements RestApiClient {
     Duration? cacheLifetimeDuration,
   }) async {
     try {
-      final response = await _dio.get(
+      final response = await dio.get(
         path, // The endpoint to hit
         queryParameters:
             queryParameters, // The parameters to send with the request
@@ -177,7 +177,7 @@ class RestApiClientImpl implements RestApiClient {
     final requestOptions = RequestOptions(
       path: path, // Path of the request
       queryParameters: queryParameters, // Query parameters
-      headers: _dio.options.headers, // Request headers
+      headers: dio.options.headers, // Request headers
     );
 
     try {
@@ -274,7 +274,7 @@ class RestApiClientImpl implements RestApiClient {
     Duration? cacheLifetimeDuration,
   }) async {
     try {
-      final response = await _dio.post(
+      final response = await dio.post(
         path, // The endpoint to hit
         data: data, // Data to send in the request body
         queryParameters: queryParameters, // Query parameters
@@ -322,7 +322,7 @@ class RestApiClientImpl implements RestApiClient {
       path: path, // Path of the request
       queryParameters: queryParameters, // Query parameters
       data: data, // Optional data in request body
-      headers: _dio.options.headers, // Request headers
+      headers: dio.options.headers, // Request headers
     );
 
     return CacheResult(
@@ -379,7 +379,7 @@ class RestApiClientImpl implements RestApiClient {
     RestApiClientRequestOptions? options,
   }) async {
     try {
-      final response = await _dio.put(
+      final response = await dio.put(
         path, // The endpoint to hit
         queryParameters: queryParameters, // Query parameters
         data: data, // Data to send in the request body
@@ -420,7 +420,7 @@ class RestApiClientImpl implements RestApiClient {
     RestApiClientRequestOptions? options,
   }) async {
     try {
-      final response = await _dio.head(
+      final response = await dio.head(
         path, // The endpoint to hit
         queryParameters: queryParameters, // Query parameters
         data: data, // Optional data in request body
@@ -461,7 +461,7 @@ class RestApiClientImpl implements RestApiClient {
     RestApiClientRequestOptions? options,
   }) async {
     try {
-      final response = await _dio.delete(
+      final response = await dio.delete(
         path,
         queryParameters: queryParameters, // Query parameters
         data: data, // Data to send in the request body
@@ -502,7 +502,7 @@ class RestApiClientImpl implements RestApiClient {
     RestApiClientRequestOptions? options,
   }) async {
     try {
-      final response = await _dio.patch(
+      final response = await dio.patch(
         path, // The endpoint to hit
         queryParameters: queryParameters, // Query parameters
         data: data, // Data to send in the request body
@@ -548,7 +548,7 @@ class RestApiClientImpl implements RestApiClient {
     FutureOr<T> Function(dynamic data)? onError,
   }) async {
     try {
-      final response = await _dio.download(
+      final response = await dio.download(
         urlPath, // The URL path to download from
         savePath, // The local path to save the downloaded file
         queryParameters: queryParameters, // Query parameters
@@ -586,7 +586,7 @@ class RestApiClientImpl implements RestApiClient {
   /// Sets the content type for requests.
   @override
   void setContentType(String contentType) =>
-      _dio.options.contentType = contentType;
+      dio.options.contentType = contentType;
 
   /// Clears authentication and cache storage.
   @override
@@ -600,7 +600,7 @@ class RestApiClientImpl implements RestApiClient {
   /// Configures logging options for Dio.
   void _configureLogging() {
     if (_loggingOptions.logNetworkTraffic) {
-      _dio.interceptors.add(
+      dio.interceptors.add(
         PrettyDioLogger(
           responseBody: _loggingOptions.responseBody,
           requestBody: _loggingOptions.requestBody,
@@ -616,9 +616,9 @@ class RestApiClientImpl implements RestApiClient {
 
   /// Adds custom interceptors to Dio.
   void _addInterceptors(List<Interceptor> interceptors) {
-    _dio.interceptors.addAll(interceptors); // Add custom interceptors
+    dio.interceptors.addAll(interceptors); // Add custom interceptors
 
-    _dio.interceptors.add(RefreshTokenInterceptor(
+    dio.interceptors.add(RefreshTokenInterceptor(
       authHandler: authHandler, // Add refresh token interceptor
       exceptionHandler: exceptionHandler,
       exceptionOptions: _exceptionOptions,
@@ -629,7 +629,7 @@ class RestApiClientImpl implements RestApiClient {
   /// Configures certificate overriding for development.
   void _configureCertificateOverride() {
     if (_options.overrideBadCertificate && !kIsWeb) {
-      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+      (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
         final client = HttpClient(); // Create HttpClient instance
 
         client.badCertificateCallback =
@@ -668,19 +668,15 @@ class RestApiClientImpl implements RestApiClient {
   /// Adds or updates a header in the request.
   @override
   void addOrUpdateHeader({required String key, required String value}) =>
-      _dio.options.headers.containsKey(key)
-          ? _dio.options.headers.update(key, (v) => value)
-          : _dio.options.headers.addAll({key: value});
+      dio.options.headers.containsKey(key)
+          ? dio.options.headers.update(key, (v) => value)
+          : dio.options.headers.addAll({key: value});
 
   /// Resolves a result based on the data and optional success callback.
   FutureOr<T?> _resolveResult<T>(dynamic data,
       [FutureOr<T?> Function(dynamic data)? callback]) async {
-    if (data != null && callback != null) {
-      return await callback((data is String && data.isEmpty)
-          ? null
-          : data); // Call success callback
-    } else {
-      return null; // Return null if no data
-    }
+    return callback != null
+        ? await callback((data is String && data.isEmpty) ? null : data)
+        : data; // Call success callback
   }
 }

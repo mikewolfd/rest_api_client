@@ -9,7 +9,7 @@ abstract class RestApiClient {
   late CacheHandler cacheHandler; // Handler for caching responses
   Map<String, String> get headers; // Gets the current request headers
 
-  /// Initializes the client and its handlers.
+  late Dio dio;
   Future<RestApiClient> init();
 
   /// Sends a GET request to the specified [path].

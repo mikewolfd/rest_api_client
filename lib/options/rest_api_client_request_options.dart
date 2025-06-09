@@ -8,11 +8,7 @@ class RestApiClientRequestOptions {
   /// authorization tokens, content types, or any other necessary
   /// headers that your API might require.
   Map<String, dynamic>? headers;
-
-  /// The content type of the request.
-  ///
-  /// This specifies the media type of the resource being sent,
-  /// allowing clients to communicate appropriately with the server.
+  Options? options;
   String? contentType;
 
   /// A flag to indicate whether to suppress exceptions.
@@ -29,6 +25,7 @@ class RestApiClientRequestOptions {
   /// will be thrown unless specified.
   RestApiClientRequestOptions({
     this.headers,
+    this.options,
     this.contentType,
     this.silentException = false,
   });
@@ -38,9 +35,13 @@ class RestApiClientRequestOptions {
   /// This method is useful for transforming the RestApiClientRequestOptions
   /// into a format that can be utilized by Dio when making HTTP requests.
   Options toOptions() {
-    return Options(
-      headers: headers,
-      contentType: contentType,
-    );
+    return options?.copyWith(
+          headers: headers,
+          contentType: contentType,
+        ) ??
+        Options(
+          headers: headers,
+          contentType: contentType,
+        );
   }
 }
