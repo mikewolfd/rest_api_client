@@ -100,10 +100,36 @@ class AuthHandler {
       if (handler != null) {
         handler.next(requestOptions);
       } else {
-        return await dio.request(
+        // Create a new Dio instance for retry to avoid interceptor deadlock
+        final retryDio = Dio(BaseOptions(
+          baseUrl: dio.options.baseUrl,
+          connectTimeout: dio.options.connectTimeout,
+          receiveTimeout: dio.options.receiveTimeout,
+          sendTimeout: dio.options.sendTimeout,
+          headers: dio.options.headers,
+        ));
+
+        // Clone FormData if needed to avoid "already finalized" error
+        dynamic retryData = requestOptions.data;
+        if (requestOptions.data is FormData) {
+          final originalFormData = requestOptions.data as FormData;
+          retryData = FormData();
+
+          // Copy fields
+          for (final field in originalFormData.fields) {
+            retryData.fields.add(MapEntry(field.key, field.value));
+          }
+
+          // Copy files
+          for (final file in originalFormData.files) {
+            retryData.files.add(file);
+          }
+        }
+
+        return await retryDio.request(
           requestOptions.path,
           cancelToken: requestOptions.cancelToken,
-          data: requestOptions.data,
+          data: retryData,
           onReceiveProgress: requestOptions.onReceiveProgress,
           onSendProgress: requestOptions.onSendProgress,
           queryParameters: requestOptions.queryParameters,
