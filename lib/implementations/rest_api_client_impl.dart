@@ -26,6 +26,7 @@ import 'package:rest_api_client/options/rest_api_client_options.dart';
 
 class RestApiClientImpl implements RestApiClient {
   /// Dio instance for making API requests
+  @override
   late Dio dio;
 
   /// Options for the REST API client
